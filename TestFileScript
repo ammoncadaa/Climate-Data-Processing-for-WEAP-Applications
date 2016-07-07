@@ -1,0 +1,78 @@
+---
+title: "Correcting Precipitation and Temperature Data"
+output: github_document
+toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Summary of Script
+
+Purpose: correct temperature and precipitation data from local climate stations. Includes the following processes:
+
+1. Subsets data for a selected period of record 
+2. Eliminate (by replacing with NA) precipitation data < 0 and when temp data = "SD" or other nonnumeric values
+3. Identifies and replaces with "NA" the "extreme" precip and temp values (requires user-defined threshholds!!!!)
+4. Calculate %NA for all stations and eliminates stations above threhhold (requires setting/experimenting threshhold and manually cycling through Precip, Temp_Min and Temp_Max data frames. You must go through all three variables before continuing to step 5). This step is optional and can be turned off in "USER-defined variables".
+5. Subsets the Temp data so that Temp_Max and Temp_Min have the same stations
+6. Identifies errors in which Temp_Min > Temp_Max (requires looking at output error document and checking/fixing values in read-in file by hand before continuing)
+
+!! IMPORTANT: Step 3 requires the setting of some user-defined threshholds. A summary of max/min/mean values per station can be used for this.
+!! IMPORTANT: Step 4 requires some trial-and-error to reach an adequate %NA threshhold... relevant to the decision could be the resulting number of stations, the location of the stations, etc (there exist other scripts to investigate these deciding factors)
+!! Important: Step 6 requires manually fixing errors in original temp files (based on output error file) 
+
+!! IMPORTANT: Be sure to look at sample input files to maintain proper format. 
+
+## User-Defined Variables
+
+You can include R code in the document as follows:
+
+```{r user defined variables}
+setwd("C:\\Users\\Manon\\Dropbox\\Shared Learning\\Tool_Process_Workflows\\R stuff\\ClimateDataCorrections\\Sample Input") ##USER-DEFINED: folder to open input (pre-processed) files
+dir_out <- "C:\\Users\\Manon\\Dropbox\\Shared Learning\\Tool_Process_Workflows\\R stuff\\ClimateDataCorrections\\Sample Output" ##USER-DEFINED: folder to save intermediate & final outputs
+
+Precip <- read.csv("Table_All_Precip.csv",stringsAsFactors=FALSE) # Reads in precipitation file (make sure the format is correct!!)
+Temp_Min <- read.csv("Table_All_Temp_Min.csv", stringsAsFactors=FALSE) # Reads in minimum temperature file (make sure the format is correct!!)
+Temp_Max <- read.csv("Table_All_Temp_Max.csv",stringsAsFactors=FALSE) # Reads in maximum temperature file (make sure format is correct!!)
+
+year1 <- 1970 ##USER-DEFINED first year
+year2 <- 2015 ##USER-DEFINED last year
+
+max_Tmin <- 35 ##USER-defined: threshold for reasonable max of Tmin
+max_Tmax <- 41 ##USER-defined: threshold for reasonable Tmax max
+min_Tmin <- -10.5##USER-defined: threshold for reasonable Tmin min
+min_Tmax <- 9 ##USER-defined: threshold for reasonable Tmax min
+max_Precip <- 146 ##USER-defined: threshold for reasonable precip max
+thresholdNA <- 50 #USER-defined: threshold of %NA values allowed to remain in station data (if %NA is greater than this, the script will remove station from analysis)
+
+NA_analysis <- "YES" #USER-defined: enter either "YES" or "NO", whether you want to run step 4
+
+dir_in <- getwd()
+```
+
+## Section 1: Subsetting data to period of interest
+
+You can also embed plots, for example:
+
+```{r subset, echo=FALSE}
+
+Temp_Min <- subset(Temp_Min, Temp_Min$Anio >= year1) # Subsets data frame for which the year is greater than the previously defined start year
+Temp_Min <- subset(Temp_Min, Temp_Min$Anio <= year2) # Selects data frame for which the year is less than the previously defiend end year
+
+Temp_Max <- subset(Temp_Max, Temp_Max$Anio >= year1) # Subsets data frame for which the year is greater than the previously defined start year
+Temp_Max <- subset(Temp_Max, Temp_Max$Anio <= year2) # Selects data frame for which the year is less than the previously defiend end year
+
+Precip <- subset(Precip, Precip$Anio >= year1) # Subsets data frame for which the year is greater than the previously defined start year
+Precip <- subset(Precip, Precip$Anio <= year2) # Selects data frame for which the year is less than the previously defiend end year
+
+```
+
+## Section 2: Eliminate incorrect values in precipitation and temperature data
+
+:sunglasses:
+:neckbeard:
+
+You can also embed plots, for example:
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
